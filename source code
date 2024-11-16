@@ -1,0 +1,90 @@
+
+pip install pillow moviepy imageio matplotlib
+2. Image Combination
+Load and combine images:
+
+from PIL import Image
+
+def combine_images(image_paths, output_path):
+    images = [Image.open(img) for img in image_paths]
+    widths, heights = zip(*(img.size for img in images))
+
+    total_width = sum(widths)
+    max_height = max(heights)
+
+    combined_image = Image.new('RGB', (total_width, max_height))
+    x_offset = 0
+    for img in images:
+        combined_image.paste(img, (x_offset, 0))
+        x_offset += img.size[0]
+
+    combined_image.save(output_path)
+    print(f"Combined image saved to {output_path}")
+
+# Example usage
+combine_images(['img1.jpg', 'img2.jpg', 'img3.jpg'], 'combined_image.jpg')
+
+
+3. Apply Animation
+Create an animation using moviepy:
+
+from moviepy.editor import ImageClip, concatenate_videoclips
+
+def create_animation(image_path, output_video):
+    clips = []
+    for i in range(1, 11):  # Simple zoom-in effect
+        clip = ImageClip(image_path, duration=0.2).resize(1 + i * 0.05)
+        clips.append(clip)
+    
+    final_clip = concatenate_videoclips(clips)
+    final_clip.write_videofile(output_video, fps=24)
+
+# Example usage
+create_animation('combined_image.jpg', 'animation.mp4')
+
+
+4. Interactive UI (Optional)
+Add a UI with tkinter to load images and preview animation:
+
+
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from PIL import ImageTk, Image
+
+def load_images():
+    file_paths = filedialog.askopenfilenames(filetypes=[("Image Files", "*.jpg;*.png")])
+    if file_paths:
+        combine_images(file_paths, 'preview_combined.jpg')
+        preview_combined_image()
+
+def preview_combined_image():
+    img = Image.open('preview_combined.jpg')
+    img = img.resize((400, 300))
+    img_tk = ImageTk.PhotoImage(img)
+    preview_label.config(image=img_tk)
+    preview_label.image = img_tk
+
+root = tk.Tk()
+root.title("Image Combination and Animation")
+
+load_button = tk.Button(root, text="Load Images", command=load_images)
+load_button.pack()
+
+preview_label = tk.Label(root)
+preview_label.pack()
+
+root.mainloop()
+
+5. Export Animation to GIF
+Export the animation:
+
+
+import imageio
+
+def create_gif(frames, output_gif):
+    images = [Image.open(frame) for frame in frames]
+    imageio.mimsave(output_gif, images, duration=0.2)
+    print(f"GIF saved to {output_gif}")
+
+# Example usage
+create_gif(['frame1.jpg', 'frame2.jpg', 'frame3.jpg'], 'animation.gif')
